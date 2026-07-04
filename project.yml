@@ -1,0 +1,67 @@
+name: Breathe
+options:
+  bundleIdPrefix: com.ezragubbay
+  deploymentTarget:
+    watchOS: "11.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_IDENTITY: "-"
+    CODE_SIGNING_REQUIRED: "NO"
+targets:
+  BreatheWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - BreatheWatch
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ezragubbay.breathe.watchkitapp
+        PRODUCT_NAME: Breathe
+        GENERATE_INFOPLIST_FILE: "NO"
+        INFOPLIST_FILE: BreatheWatch/Info.plist
+        CODE_SIGN_ENTITLEMENTS: BreatheWatch/Breathe.entitlements
+        TARGETED_DEVICE_FAMILY: "4"
+        CURRENT_PROJECT_VERSION: "1"
+        MARKETING_VERSION: "1.0"
+        ENABLE_PREVIEWS: "YES"
+  BreatheWatchTests:
+    type: bundle.unit-test
+    platform: watchOS
+    sources:
+      - BreatheWatchTests
+    dependencies:
+      - target: BreatheWatch
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ezragubbay.breathe.watchkitapp.tests
+        GENERATE_INFOPLIST_FILE: "YES"
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Breathe.app/Breathe
+        BUNDLE_LOADER: $(TEST_HOST)
+  BreatheWatchUITests:
+    type: bundle.ui-testing
+    platform: watchOS
+    sources:
+      - BreatheWatchUITests
+    dependencies:
+      - target: BreatheWatch
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ezragubbay.breathe.watchkitapp.uitests
+        GENERATE_INFOPLIST_FILE: "YES"
+        TEST_TARGET_NAME: BreatheWatch
+schemes:
+  BreatheWatch:
+    build:
+      targets:
+        BreatheWatch: all
+        BreatheWatchTests: [test]
+        BreatheWatchUITests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - BreatheWatchTests
+        - BreatheWatchUITests
