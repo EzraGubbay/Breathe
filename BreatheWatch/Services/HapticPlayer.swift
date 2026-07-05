@@ -39,11 +39,11 @@ final class HapticPlayer {
             let maxGap: TimeInterval = 1.2  // Slow start/end
             let decelerationDuration: TimeInterval = 0.4 // Closer to the edge
             
-            // Using .click to ensure single, crisp vibrations and prevent the Taptic Engine from grouping them
-            let hapticType: WKHapticType = .click
+            let heavyHaptic: WKHapticType = (kind == .inhale) ? .directionUp : .directionDown
+            let lightHaptic: WKHapticType = .click
+            let hardwareLimit: TimeInterval = 0.22 // Threshold to switch to clicks to avoid queue grouping
             
             while t < duration && !Task.isCancelled {
-                WKInterfaceDevice.current().play(hapticType)
                 
                 let gap: TimeInterval
                 let remaining = duration - t
@@ -51,15 +51,17 @@ final class HapticPlayer {
                 if remaining <= decelerationDuration {
                     // Deceleration: gap increases from minGap to maxGap as lungs reach full capacity
                     let progress = 1.0 - (remaining / decelerationDuration) // 0.0 to 1.0
-                    // Use a curve so it slows down gracefully
                     gap = minGap + (maxGap - minGap) * (progress * progress)
                 } else {
                     // Acceleration: gap decreases from maxGap to minGap as they take in breath
                     let accelerationDuration = duration - decelerationDuration
                     let progress = (accelerationDuration > 0) ? (t / accelerationDuration) : 1.0
-                    // Accelerate smoothly
                     gap = maxGap - (maxGap - minGap) * progress
                 }
+                
+                // Play heavy bump if gap is wide enough, otherwise switch to rapid light clicks
+                let hapticToPlay = (gap < hardwareLimit) ? lightHaptic : heavyHaptic
+                WKInterfaceDevice.current().play(hapticToPlay)
                 
                 t += gap
                 
