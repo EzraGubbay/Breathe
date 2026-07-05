@@ -35,9 +35,9 @@ final class HapticPlayer {
     private func playDynamicPattern(duration: TimeInterval) {
         dynamicHapticTask = Task {
             var t: TimeInterval = 0
-            let minGap: TimeInterval = 0.5
-            let maxGap: TimeInterval = 1.6
-            let flutterDuration: TimeInterval = 1.5
+            let minGap: TimeInterval = 0.8
+            let maxGap: TimeInterval = 2.2
+            let flutterDuration: TimeInterval = 1.8
             
             while t < duration && !Task.isCancelled {
                 WKInterfaceDevice.current().play(.click)
@@ -47,7 +47,7 @@ final class HapticPlayer {
                 
                 if remaining <= flutterDuration {
                     let progress = 1.0 - (remaining / flutterDuration)
-                    gap = 0.15 + (0.35 * progress)
+                    gap = 0.10 + (0.25 * progress)
                 } else {
                     let mainDuration = duration - flutterDuration
                     if mainDuration > 0 {
