@@ -19,16 +19,6 @@ struct SessionView: View {
                 SummaryView(summary: summary) { dismiss() }
             } else {
                 activeSession
-                    .overlay {
-                        if isPreparing {
-                            Text("Follow the visual\nor haptic cues.")
-                                .font(.body)
-                                .multilineTextAlignment(.center)
-                                .foregroundStyle(.teal)
-                                .padding()
-                                .transition(.opacity)
-                        }
-                    }
             }
         }
         .onAppear {
@@ -57,6 +47,16 @@ struct SessionView: View {
             header
             Spacer(minLength: 0)
             visual
+                .overlay(alignment: .bottom) {
+                    if isPreparing {
+                        Text("Follow the visual\nor haptic cues.")
+                            .font(.body.weight(.semibold))
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(.white)
+                            .padding(.bottom, 10)
+                            .transition(.opacity)
+                    }
+                }
             Spacer(minLength: 0)
             Button(role: .destructive) {
                 controller.endEarly()

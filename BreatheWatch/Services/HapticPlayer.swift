@@ -35,11 +35,12 @@ final class HapticPlayer {
     private func playDynamicPattern(for kind: BreathPhaseKind, duration: TimeInterval) {
         dynamicHapticTask = Task {
             var t: TimeInterval = 0
-            let minGap: TimeInterval = 0.15 // Rapid peak
+            let minGap: TimeInterval = 0.08 // Denser, rapid peak
             let maxGap: TimeInterval = 1.2  // Slow start/end
-            let decelerationDuration: TimeInterval = 1.5 // Time at the end spent slowing down
+            let decelerationDuration: TimeInterval = 0.4 // Closer to the edge
             
-            let hapticType: WKHapticType = (kind == .inhale) ? .directionUp : .directionDown
+            // Using .click to ensure single, crisp vibrations and prevent the Taptic Engine from grouping them
+            let hapticType: WKHapticType = .click
             
             while t < duration && !Task.isCancelled {
                 WKInterfaceDevice.current().play(hapticType)
