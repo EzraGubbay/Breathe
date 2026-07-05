@@ -15,7 +15,7 @@ final class HapticPlayer {
         
         if sessionType == .resonance || sessionType == .sigh {
             if let duration = phase.duration, (phase.kind == .inhale || phase.kind == .exhale) {
-                playDynamicPattern(duration: duration)
+                playDynamicPattern(for: phase.kind, duration: duration)
                 return
             }
         }
@@ -32,31 +32,32 @@ final class HapticPlayer {
         log.debug("haptic \(String(describing: haptic.rawValue)) for phase \(phase.kind.label, privacy: .public)")
     }
 
-    private func playDynamicPattern(duration: TimeInterval) {
+    private func playDynamicPattern(for kind: BreathPhaseKind, duration: TimeInterval) {
         dynamicHapticTask = Task {
             var t: TimeInterval = 0
-            let minGap: TimeInterval = 0.8
-            let maxGap: TimeInterval = 2.2
-            let flutterDuration: TimeInterval = 1.8
+            let minGap: TimeInterval = 0.15 // Rapid peak
+            let maxGap: TimeInterval = 1.2  // Slow start/end
+            let decelerationDuration: TimeInterval = 1.5 // Time at the end spent slowing down
+            
+            let hapticType: WKHapticType = (kind == .inhale) ? .directionUp : .directionDown
             
             while t < duration && !Task.isCancelled {
-                WKInterfaceDevice.current().play(.click)
+                WKInterfaceDevice.current().play(hapticType)
                 
                 let gap: TimeInterval
                 let remaining = duration - t
                 
-                if remaining <= flutterDuration {
-                    let progress = 1.0 - (remaining / flutterDuration)
-                    gap = 0.10 + (0.25 * progress)
+                if remaining <= decelerationDuration {
+                    // Deceleration: gap increases from minGap to maxGap as lungs reach full capacity
+                    let progress = 1.0 - (remaining / decelerationDuration) // 0.0 to 1.0
+                    // Use a curve so it slows down gracefully
+                    gap = minGap + (maxGap - minGap) * (progress * progress)
                 } else {
-                    let mainDuration = duration - flutterDuration
-                    if mainDuration > 0 {
-                        let normalized = t / mainDuration
-                        let centered = (normalized - 0.5) * 2.0
-                        gap = maxGap - (maxGap - minGap) * (centered * centered)
-                    } else {
-                        gap = minGap
-                    }
+                    // Acceleration: gap decreases from maxGap to minGap as they take in breath
+                    let accelerationDuration = duration - decelerationDuration
+                    let progress = (accelerationDuration > 0) ? (t / accelerationDuration) : 1.0
+                    // Accelerate smoothly
+                    gap = maxGap - (maxGap - minGap) * progress
                 }
                 
                 t += gap

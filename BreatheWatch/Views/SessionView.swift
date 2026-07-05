@@ -17,10 +17,18 @@ struct SessionView: View {
         ZStack {
             if let summary = controller.summary {
                 SummaryView(summary: summary) { dismiss() }
-            } else if isPreparing {
-                preparingView
             } else {
                 activeSession
+                    .overlay {
+                        if isPreparing {
+                            Text("Follow the visual\nor haptic cues.")
+                                .font(.body)
+                                .multilineTextAlignment(.center)
+                                .foregroundStyle(.teal)
+                                .padding()
+                                .transition(.opacity)
+                        }
+                    }
             }
         }
         .onAppear {
@@ -42,17 +50,6 @@ struct SessionView: View {
                 controller.endEarly()
             }
         }
-    }
-
-    private var preparingView: some View {
-        VStack {
-            Text("Follow the visual or haptic cues.")
-                .font(.body)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.teal)
-                .padding()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var activeSession: some View {
