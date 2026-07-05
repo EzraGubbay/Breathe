@@ -56,10 +56,7 @@ assertion), and Wim Hof retention tap-to-advance.
 
 ## Non-negotiable constraints (SE 2nd Gen battery + Health integrity)
 
-1. **Haptics are discrete transients only**, fired at phase starts
-   (`.directionUp` inhale / `.directionDown` exhale). Never continuous or
-   repeating haptics for the length of a breath. (specs.md §Haptic Engine
-   Optimization)
+1. **Dynamic Haptic Pacing**: After testing on physical hardware, we learned that using `.directionUp` / `.directionDown` for rapid breathing patterns causes the Taptic Engine to physically queue and stutter because those types are natively constructed from 3-tap clusters. Thus, we exclusively use `.click` for dynamic patterns (like Resonance and Sigh). The curve accelerates smoothly to a dense peak near the end of the breath and then decelerates gracefully, mimicking human lung capacity changes, without overloading the SE2 hardware queue.
 2. **The workout is always discarded**: `WorkoutSessionManager.stop()` calls
    `builder.discardWorkout()` after `endCollection`. Never save it — saving
    pollutes Activity Rings and logs calories.
@@ -90,7 +87,6 @@ assertion), and Wim Hof retention tap-to-advance.
   config screens, visuals, haptics, summary.
 - Unit tests (10) + UI smoke tests (3) green.
 - Verified via logs: workout keep-alive starts, workout discarded, mindful
-  sample saved with metadata, SDNN query runs, haptics fire only at phase
-  boundaries at correct BPM spacing.
+  sample saved with metadata, SDNN query runs. Haptics now dynamically pace through the whole breath using an acceleration curve with pure `.click` to avoid hardware queueing on the SE2.
 - NOT yet done: real-device testing (haptic feel, true battery drain, real HRV
   readings), app icon, complications, session history UI.
