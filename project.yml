@@ -60,7 +60,8 @@ schemes:
         BreatheWatchTests: [test]
         BreatheWatchUITests: [test]
     run:
-      config: Debug
+      config: Release
+      debugEnabled: false
     test:
       config: Debug
       targets:
