@@ -14,7 +14,7 @@ struct SessionView: View {
     }
 
     var body: some View {
-        Group {
+        ZStack {
             if let summary = controller.summary {
                 SummaryView(summary: summary) { dismiss() }
             } else if isPreparing {
@@ -37,8 +37,10 @@ struct SessionView: View {
         }
         .onDisappear {
             prepareTask?.cancel()
-            // Make sure to clean up if the user swipes back during preparation or during the session
-            controller.endEarly()
+            // Make sure to clean up if the user swipes back, but only if not already summarized
+            if controller.summary == nil {
+                controller.endEarly()
+            }
         }
     }
 
