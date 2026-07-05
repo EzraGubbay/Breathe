@@ -38,13 +38,20 @@ struct ConfigView: View {
                 }
             }
 
-            Button {
-                sessionActive = true
-            } label: {
-                Label("Start", systemImage: "play.fill")
-                    .frame(maxWidth: .infinity)
+            Section {
+                Button {
+                    sessionActive = true
+                } label: {
+                    Text("Start")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .frame(maxWidth: .infinity, minHeight: 44)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.teal)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
             }
-            .listRowBackground(Color.teal.opacity(0.3))
         }
         .navigationTitle(type.displayName)
         .fullScreenCover(isPresented: $sessionActive) {

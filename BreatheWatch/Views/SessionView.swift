@@ -6,6 +6,8 @@ struct SessionView: View {
     @StateObject private var controller: SessionController
     @Environment(\.dismiss) private var dismiss
     @State private var started = false
+    @State private var isPreparing = true
+    @State private var prepareTask: Task<Void, Never>?
 
     init(configuration: SessionConfiguration) {
         _controller = StateObject(wrappedValue: SessionController(configuration: configuration))
@@ -15,6 +17,8 @@ struct SessionView: View {
         Group {
             if let summary = controller.summary {
                 SummaryView(summary: summary) { dismiss() }
+            } else if isPreparing {
+                preparingView
             } else {
                 activeSession
             }
@@ -22,8 +26,31 @@ struct SessionView: View {
         .onAppear {
             guard !started else { return }
             started = true
-            controller.start()
+            prepareTask = Task {
+                try? await Task.sleep(nanoseconds: 2_500_000_000)
+                guard !Task.isCancelled else { return }
+                withAnimation(.easeInOut) {
+                    isPreparing = false
+                }
+                controller.start()
+            }
         }
+        .onDisappear {
+            prepareTask?.cancel()
+            // Make sure to clean up if the user swipes back during preparation or during the session
+            controller.endEarly()
+        }
+    }
+
+    private var preparingView: some View {
+        VStack {
+            Text("Follow the visual or haptic cues.")
+                .font(.body)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.teal)
+                .padding()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var activeSession: some View {
