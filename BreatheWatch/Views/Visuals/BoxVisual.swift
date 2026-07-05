@@ -1,21 +1,40 @@
 import SwiftUI
 
-/// Segmented square loop: one side traced per phase (specs.md §2B).
 struct BoxVisual: View {
     @ObservedObject var engine: BreathingEngine
-    @State private var sideIndex = 0      // 0 inhale, 1 hold, 2 exhale, 3 hold
+    @State private var sideIndex = 0
     @State private var progress: CGFloat = 0
+    @State private var innerScale: CGFloat = 0.8
 
     var body: some View {
         VStack(spacing: 8) {
             ZStack {
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(.teal.opacity(0.25), lineWidth: 4)
-                RoundedRectangle(cornerRadius: 8)
+                // Background blurred glow
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(.teal.opacity(0.15))
+                    .frame(width: 100, height: 100)
+                    .blur(radius: 10)
+                
+                // Pulsating inner core
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(.teal.gradient.opacity(0.4))
+                    .frame(width: 80, height: 80)
+                    .scaleEffect(innerScale)
+                    .blendMode(.screen)
+                
+                // Track
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(.teal.opacity(0.2), lineWidth: 6)
+                    .frame(width: 100, height: 100)
+                
+                // Animated segment
+                RoundedRectangle(cornerRadius: 16)
                     .trim(from: CGFloat(sideIndex) * 0.25, to: progress)
-                    .stroke(.teal, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                    .stroke(.teal, style: StrokeStyle(lineWidth: 6, lineCap: .round, lineJoin: .round))
+                    .frame(width: 100, height: 100)
+                    .shadow(color: .teal, radius: 5)
             }
-            .frame(width: 96, height: 96)
+            .frame(width: 120, height: 120)
             Text(engine.currentPhase?.kind.label ?? "")
                 .font(.headline)
         }
@@ -25,6 +44,9 @@ struct BoxVisual: View {
             progress = CGFloat(sideIndex) * 0.25
             withAnimation(.linear(duration: duration)) {
                 progress = CGFloat(sideIndex + 1) * 0.25
+            }
+            withAnimation(.easeInOut(duration: duration)) {
+                innerScale = (phase.kind == .inhale || phase.kind == .holdAfterInhale) ? 1.0 : 0.8
             }
         }
     }

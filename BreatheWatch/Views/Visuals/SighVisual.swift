@@ -1,21 +1,15 @@
 import SwiftUI
 
-/// Double-pulse inflation then a long, slow deflation (specs.md §2C).
 struct SighVisual: View {
     @ObservedObject var engine: BreathingEngine
     @State private var scale: CGFloat = 0.35
+    @State private var rotation: Angle = .zero
     @State private var seenFirstInhale = false
 
     var body: some View {
         VStack(spacing: 8) {
-            ZStack {
-                Circle()
-                    .stroke(.cyan.opacity(0.25), lineWidth: 2)
-                Circle()
-                    .fill(.cyan.gradient.opacity(0.75))
-                    .scaleEffect(scale)
-            }
-            .frame(width: 110, height: 110)
+            PetalView(color: .cyan, scale: scale, rotationOffset: rotation)
+                .frame(height: 120)
             Text(label)
                 .font(.headline)
         }
@@ -25,10 +19,16 @@ struct SighVisual: View {
             case .inhale:
                 let target: CGFloat = seenFirstInhale ? 1.0 : 0.72
                 seenFirstInhale = true
-                withAnimation(.easeOut(duration: duration)) { scale = target }
+                withAnimation(.easeOut(duration: duration)) { 
+                    scale = target
+                    rotation += .degrees(30)
+                }
             case .exhale:
                 seenFirstInhale = false
-                withAnimation(.easeInOut(duration: duration)) { scale = 0.35 }
+                withAnimation(.easeInOut(duration: duration)) { 
+                    scale = 0.35
+                    rotation -= .degrees(60)
+                }
             default:
                 seenFirstInhale = false
             }
