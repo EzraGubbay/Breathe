@@ -41,7 +41,7 @@ final class HapticPlayer {
             
             let heavyHaptic: WKHapticType = (kind == .inhale) ? .directionUp : .directionDown
             let lightHaptic: WKHapticType = .click
-            let hardwareLimit: TimeInterval = 0.22 // Threshold to switch to clicks to avoid queue grouping
+            let hardwareLimit: TimeInterval = 0.45 // Increased threshold to 0.45s to aggressively prevent hardware grouping
             
             while t < duration && !Task.isCancelled {
                 
